@@ -1,0 +1,55 @@
+{% extends "management/base.html" %}
+
+{% block title %}CSVインポート - 作業時間管理{% endblock %}
+
+{% block content %}
+<h2>CSVインポート</h2>
+
+{% if success %}
+<div style="background-color: #dcfce7; border-left: 4px solid #16a34a; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem;">
+    <p style="color: #15803d; margin: 0;">{{ success }}</p>
+</div>
+{% endif %}
+
+{% if error %}
+<div style="background-color: #fee2e2; border-left: 4px solid #dc2626; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem;">
+    <p style="color: #991b1b; margin: 0;">{{ error }}</p>
+</div>
+{% endif %}
+
+{% if errors %}
+<div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem;">
+    <p style="color: #92400e; margin: 0; font-weight: 600;">インポート中に以下のエラーが発生しました：</p>
+    <ul style="color: #92400e; margin-top: 0.5rem;">
+        {% for error in errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<div style="background-color: white; padding: 2rem; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); max-width: 600px;">
+    <h3 style="margin-bottom: 1rem;">CSVファイルを選択</h3>
+    
+    <div style="background-color: #f8fafc; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem;">
+        <h4 style="margin-bottom: 0.5rem;">CSVフォーマット</h4>
+        <p style="margin: 0; font-size: 0.9rem; color: #475569;">
+            列順番: 作業日,開始時刻,終了時刻,案件名,カテゴリ,作業内容,Redmine番号,備考<br>
+            例: 2024-01-15,09:00,17:30,プロジェクトA,開発,機能実装,12345,備考テキスト
+        </p>
+    </div>
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="csv_file">CSVファイル:</label>
+            <input type="file" id="csv_file" name="csv_file" accept=".csv" required>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">インポート実行</button>
+            <a href="{% url 'worklog_list' %}" class="btn btn-secondary">キャンセル</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

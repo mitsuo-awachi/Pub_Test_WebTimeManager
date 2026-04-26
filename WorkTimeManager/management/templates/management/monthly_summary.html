@@ -1,0 +1,53 @@
+{% extends "management/base.html" %}
+
+{% block title %}月次集計 - 作業時間管理{% endblock %}
+
+{% block content %}
+<div class="filter-section">
+    <h2>月次集計</h2>
+    <form method="get" style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;">
+        <div style="flex: 1; min-width: 220px;">
+            <label for="month">対象月：</label>
+            <input type="month" id="month" name="month" value="{{ selected_month }}">
+        </div>
+        <button type="submit" class="btn btn-primary">集計</button>
+    </form>
+</div>
+
+<div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+    <div style="flex: 1; min-width: 260px; background-color: #eef2ff; padding: 1.5rem; border-radius: 6px; border-left: 4px solid #2563eb;">
+        <h3 style="margin-bottom: 0.75rem;">月合計作業時間</h3>
+        <p style="font-size: 1.85rem; font-weight: 700; margin: 0;">{{ total_work_time }}</p>
+        <p style="margin-top: 0.5rem; color: #475569;">ログ数: {{ worklogs_count }}件</p>
+    </div>
+</div>
+
+{% if project_summary %}
+<div style="background-color: white; padding: 1.5rem; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+    <h3 style="margin-bottom: 1rem;">機種別作業時間・作業割合</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>案件名</th>
+                <th>作業時間</th>
+                <th>作業割合</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in project_summary %}
+            <tr>
+                <td>{{ item.project_name }}</td>
+                <td>{{ item.work_time }}</td>
+                <td>{{ item.ratio }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <p>選択された月のデータがありません。</p>
+    <a href="{% url 'worklog_list' %}" class="btn btn-primary">ワークログ一覧へ</a>
+</div>
+{% endif %}
+{% endblock %}

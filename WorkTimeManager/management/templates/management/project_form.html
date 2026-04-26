@@ -1,0 +1,21 @@
+{% extends "management/base.html" %}
+
+{% block title %}{% if object %}案件を編集{% else %}新規案件を作成{% endif %} - 作業時間管理{% endblock %}
+
+{% block content %}
+<h2>{% if object %}案件を編集{% else %}新規案件を作成{% endif %}</h2>
+
+<form method="post" style="background-color: white; padding: 2rem; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); max-width: 600px;">
+    {% csrf_token %}
+    
+    <div class="form-group">
+        <label for="id_name">案件名 <span style="color: red;">*</span></label>
+        <input type="text" id="id_name" name="name" required maxlength="200" value="{% if object %}{{ object.name }}{% endif %}">
+    </div>
+    
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">保存</button>
+        <a href="{% url 'project_list' %}" class="btn btn-secondary">キャンセル</a>
+    </div>
+</form>
+{% endblock %}

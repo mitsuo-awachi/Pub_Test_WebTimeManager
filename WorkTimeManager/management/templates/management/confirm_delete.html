@@ -1,0 +1,32 @@
+{% extends "management/base.html" %}
+
+{% block title %}削除確認 - 作業時間管理{% endblock %}
+
+{% block content %}
+<div style="background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 2rem; border-radius: 4px; max-width: 600px;">
+    <h2 style="color: #991b1b; margin-bottom: 1rem;">削除確認</h2>
+    
+    <p style="margin-bottom: 1.5rem;">以下の{{ object_verbose_name }}を削除してもよろしいですか？この操作は取り消せません。</p>
+    
+    <div style="background-color: white; padding: 1.5rem; border-radius: 4px; margin-bottom: 1.5rem;">
+        <table style="width: 100%; border: none;">
+            <tr>
+                <td style="padding: 0.5rem; border: none;">
+                    <strong>ID：</strong> {{ object.pk }}
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 0.5rem; border: none;">
+                    <strong>名前：</strong> {{ object.name }}
+                </td>
+            </tr>
+        </table>
+    </div>
+    
+    <form method="post" style="display: flex; gap: 1rem;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">削除する</button>
+        <a href="{{ cancel_url }}" class="btn btn-secondary">キャンセル</a>
+    </form>
+</div>
+{% endblock %}

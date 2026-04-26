@@ -1,0 +1,90 @@
+{% extends "management/base.html" %}
+
+{% block title %}ワークログ一覧 - 作業時間管理{% endblock %}
+
+{% block content %}
+<div class="filter-section">
+    <h2>フィルター</h2>
+    <form method="get" style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 180px;">
+            <label for="date">日付：</label>
+            <input type="date" id="date" name="date" value="{{ request.GET.date }}">
+        </div>
+        <div style="flex: 1; min-width: 180px;">
+            <label for="category">カテゴリ：</label>
+            <select id="category" name="category">
+                <option value="">すべて</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div style="flex: 1; min-width: 180px;">
+            <label for="project">案件名：</label>
+            <select id="project" name="project">
+                <option value="">すべて</option>
+                {% for project in projects %}
+                    <option value="{{ project.id }}" {% if request.GET.project == project.id|stringformat:"s" %}selected{% endif %}>{{ project.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">フィルター</button>
+        <a href="{% url 'worklog_list' %}" class="btn btn-secondary">クリア</a>
+    </form>
+</div>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <h2>ワークログ一覧</h2>
+    <a href="{% url 'worklog_create' %}" class="btn btn-primary">新規作成</a>
+</div>
+
+{% if worklogs %}
+<table>
+    <thead>
+        <tr>
+            <th>作業日</th>
+            <th>開始時刻</th>
+            <th>終了時刻</th>
+            <th>作業時間</th>
+            <th>カテゴリ</th>
+            <th>案件名</th>
+            <th>作業内容</th>
+            <th>Redmine番号</th>
+            <th>備考</th>
+            <th>アクション</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for worklog in worklogs %}
+        <tr>
+            <td>{{ worklog.date|date:"Y-m-d" }}</td>
+            <td>{{ worklog.start_time|time:"H:i" }}</td>
+            <td>{{ worklog.end_time|time:"H:i" }}</td>
+            <td>{{ worklog.working_hours }}</td>
+            <td>{{ worklog.display_category_name }}</td>
+            <td>{{ worklog.display_project_name }}</td>
+            <td>{{ worklog.content|truncatewords:15 }}</td>
+            <td>{{ worklog.redmine_no|default:"-" }}</td>
+            <td>{{ worklog.remarks|truncatewords:10|default:"-" }}</td>
+            <td>
+                <div class="action-buttons">
+                    <a href="{% url 'worklog_update' worklog.pk %}" class="btn btn-primary" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">編集</a>
+                    <a href="{% url 'worklog_delete' worklog.pk %}" class="btn btn-danger" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">削除</a>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div style="margin-top: 1.5rem; padding: 1rem; background-color: #f0f9ff; border-radius: 4px; border-left: 4px solid #0284c7;">
+    <strong>合計作業ログ：</strong> {{ worklogs.count }}件
+</div>
+
+{% else %}
+<div class="empty-state">
+    <p>ワークログが見つかりません。</p>
+    <a href="{% url 'worklog_create' %}" class="btn btn-primary">最初のワークログを作成</a>
+</div>
+{% endif %}
+{% endblock %}

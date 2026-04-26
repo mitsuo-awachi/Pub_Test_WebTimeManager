@@ -1,0 +1,47 @@
+{% extends "management/base.html" %}
+
+{% block title %}ワークログを削除 - 作業時間管理{% endblock %}
+
+{% block content %}
+<div style="background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 2rem; border-radius: 4px; max-width: 600px;">
+    <h2 style="color: #991b1b; margin-bottom: 1rem;">ワークログの削除確認</h2>
+    
+    <p style="margin-bottom: 1.5rem;">以下のワークログを削除してもよろしいですか？この操作は取り消せません。</p>
+    
+    <div style="background-color: white; padding: 1.5rem; border-radius: 4px; margin-bottom: 1.5rem;">
+        <table style="width: 100%; border: none;">
+            <tr>
+                <td style="padding: 0.5rem; border: none;">
+                    <strong>作業日：</strong> {{ worklog.date|date:"Y-m-d" }}
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 0.5rem; border: none;">
+                    <strong>時間：</strong> {{ worklog.start_time|time:"H:i" }} - {{ worklog.end_time|time:"H:i" }}
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 0.5rem; border: none;">
+                    <strong>カテゴリ：</strong> {{ worklog.category.name }}
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 0.5rem; border: none;">
+                    <strong>案件名：</strong> {{ worklog.project.name }}
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 0.5rem; border: none;">
+                    <strong>作業内容：</strong> {{ worklog.content }}
+                </td>
+            </tr>
+        </table>
+    </div>
+    
+    <form method="post" style="display: flex; gap: 1rem;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">削除する</button>
+        <a href="{% url 'worklog_list' %}" class="btn btn-secondary">キャンセル</a>
+    </form>
+</div>
+{% endblock %}

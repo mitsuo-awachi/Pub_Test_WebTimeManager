@@ -1,0 +1,84 @@
+{% extends "management/base.html" %}
+
+{% block title %}{% if worklog %}ワークログを編集{% else %}新規ワークログを作成{% endif %} - 作業時間管理{% endblock %}
+
+{% block content %}
+<h2>{% if worklog %}ワークログを編集{% else %}新規ワークログを作成{% endif %}</h2>
+
+{% if error %}
+<div class="error">
+    <strong>エラーが発生しました：</strong> {{ error }}
+</div>
+{% endif %}
+
+<form method="post" style="background-color: white; padding: 2rem; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); max-width: 800px;">
+    {% csrf_token %}
+    
+    <div class="form-row">
+        <div class="form-group">
+            <label for="date">作業日 <span style="color: red;">*</span></label>
+            <input type="date" id="date" name="date" required value="{% if worklog %}{{ worklog.date|date:'Y-m-d' }}{% else %}{{ today|date:'Y-m-d' }}{% endif %}">
+        </div>
+        
+        <div class="form-group">
+            <label for="start_time">開始時刻 <span style="color: red;">*</span></label>
+            <input type="time" id="start_time" name="start_time" required value="{% if worklog %}{{ worklog.start_time|time:'H:i' }}{% endif %}">
+        </div>
+        
+        <div class="form-group">
+            <label for="end_time">終了時刻 <span style="color: red;">*</span></label>
+            <input type="time" id="end_time" name="end_time" required value="{% if worklog %}{{ worklog.end_time|time:'H:i' }}{% endif %}">
+        </div>
+    </div>
+    
+    <div class="form-row">
+        <div class="form-group">
+            <label for="category">カテゴリ <span style="color: red;">*</span></label>
+            <div style="display: flex; gap: 0.5rem; align-items: flex-end;">
+                <select id="category" name="category" required style="flex: 1;">
+                    <option value="">-- 選択してください --</option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}" {% if worklog.category.id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+                <a href="{% url 'category_list' %}" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.75rem 1rem;">管理</a>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="project">案件名 <span style="color: red;">*</span></label>
+            <div style="display: flex; gap: 0.5rem; align-items: flex-end;">
+                <select id="project" name="project" required style="flex: 1;">
+                    <option value="">-- 選択してください --</option>
+                    {% for project in projects %}
+                    <option value="{{ project.id }}" {% if worklog.project.id == project.id %}selected{% endif %}>{{ project.name }}</option>
+                    {% endfor %}
+                </select>
+                <a href="{% url 'project_list' %}" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.75rem 1rem;">管理</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <label for="content">作業内容 <span style="color: red;">*</span></label>
+        <textarea id="content" name="content" required>{% if worklog %}{{ worklog.content }}{% endif %}</textarea>
+    </div>
+    
+    <div class="form-row">
+        <div class="form-group">
+            <label for="redmine_no">Redmine番号</label>
+            <input type="number" id="redmine_no" name="redmine_no" value="{% if worklog %}{{ worklog.redmine_no }}{% endif %}">
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <label for="remarks">備考</label>
+        <textarea id="remarks" name="remarks">{% if worklog %}{{ worklog.remarks }}{% endif %}</textarea>
+    </div>
+    
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">保存</button>
+        <a href="{% url 'worklog_list' %}" class="btn btn-secondary">キャンセル</a>
+    </div>
+</form>
+{% endblock %}

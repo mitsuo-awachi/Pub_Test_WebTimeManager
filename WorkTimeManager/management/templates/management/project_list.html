@@ -1,0 +1,46 @@
+{% extends "management/base.html" %}
+
+{% block title %}案件一覧 - 作業時間管理{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <h2>案件一覧</h2>
+    <a href="{% url 'project_create' %}" class="btn btn-primary">新規作成</a>
+</div>
+
+{% if projects %}
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>案件名</th>
+            <th>アクション</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for project in projects %}
+        <tr>
+            <td>{{ project.id }}</td>
+            <td>{{ project.name }}</td>
+            <td>
+                <div class="action-buttons">
+                    <a href="{% url 'project_update' project.pk %}" class="btn btn-primary" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">編集</a>
+                    <a href="{% url 'project_delete' project.pk %}" class="btn btn-danger" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">削除</a>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div style="margin-top: 1.5rem; padding: 1rem; background-color: #f0f9ff; border-radius: 4px; border-left: 4px solid #0284c7;">
+    <strong>合計案件：</strong> {{ projects.count }}件
+</div>
+
+{% else %}
+<div class="empty-state">
+    <p>案件が見つかりません。</p>
+    <a href="{% url 'project_create' %}" class="btn btn-primary">最初の案件を作成</a>
+</div>
+{% endif %}
+{% endblock %}
