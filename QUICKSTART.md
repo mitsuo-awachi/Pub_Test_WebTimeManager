@@ -27,6 +27,9 @@ pip install django
 ```powershell
 cd WorkTimeManager
 
+# management_categoryテーブル作成
+python manage.py makemigrations management
+
 # マイグレーション実行
 python manage.py migrate
 
@@ -34,10 +37,6 @@ python manage.py migrate
 python manage.py createsuperuser
 # プロンプトに従ってユーザー名、メール、パスワードを入力
 
-# テストデータを作成（オプション）
-python manage.py shell
->>> exec(open('../create_test_data.py').read())
->>> exit()
 ```
 
 ## ステップ3: サーバー起動
