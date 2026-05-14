@@ -11,7 +11,7 @@
 </div>
 {% endif %}
 
-<form method="post" style="background-color: white; padding: 2rem; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); max-width: 800px;">
+<form method="post" style="background-color: white; padding: 2rem; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); max-width: 1000px;">
     {% csrf_token %}
     
     <div class="form-row">
@@ -19,18 +19,34 @@
             <label for="date">作業日 <span style="color: red;">*</span></label>
             <input type="date" id="date" name="date" required value="{% if worklog %}{{ worklog.date|date:'Y-m-d' }}{% else %}{{ today|date:'Y-m-d' }}{% endif %}">
         </div>
-        
+    </div>
+    <div class="form-row">
         <div class="form-group">
             <label for="start_time">開始時刻 <span style="color: red;">*</span></label>
             <input type="time" id="start_time" name="start_time" required value="{% if worklog %}{{ worklog.start_time|time:'H:i' }}{% endif %}">
         </div>
         
         <div class="form-group">
-            <label for="end_time">終了時刻 <span style="color: red;">*</span></label>
-            <input type="time" id="end_time" name="end_time" required value="{% if worklog %}{{ worklog.end_time|time:'H:i' }}{% endif %}">
+            <label for="end_time">終了時刻</label>
+            <input type="time" id="end_time" name="end_time" value="{% if worklog %}{{ worklog.end_time|time:'H:i' }}{% endif %}">
         </div>
     </div>
     
+    <div class="form-row">
+        <div class="form-group">
+            <label for="project">案件名</label>
+            <div style="display: flex; gap: 0.5rem; align-items: flex-end;">
+                <select id="project" name="project" required style="flex: 1;">
+                    <option value="">-- 選択してください --</option>
+                    {% for project in projects %}
+                    <option value="{{ project.id }}" {% if worklog.project.id == project.id %}selected{% endif %}>{{ project.name }}</option>
+                    {% endfor %}
+                </select>
+                <a href="{% url 'project_list' %}" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.75rem 1rem;">管理</a>
+            </div>
+        </div>
+    </div>
+
     <div class="form-row">
         <div class="form-group">
             <label for="category">カテゴリ <span style="color: red;">*</span></label>
@@ -43,25 +59,25 @@
                 </select>
                 <a href="{% url 'category_list' %}" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.75rem 1rem;">管理</a>
             </div>
-        </div>
-        
         <div class="form-group">
-            <label for="project">案件名 <span style="color: red;">*</span></label>
+            <label for="subcategory">サブカテゴリ</label>
             <div style="display: flex; gap: 0.5rem; align-items: flex-end;">
-                <select id="project" name="project" required style="flex: 1;">
+                <select id="subcategory" name="subcategory" style="flex: 1;">
                     <option value="">-- 選択してください --</option>
-                    {% for project in projects %}
-                    <option value="{{ project.id }}" {% if worklog.project.id == project.id %}selected{% endif %}>{{ project.name }}</option>
+                    {% for subcategory in subcategories %}
+                    <option value="{{ subcategory.id }}" data-category="{{ subcategory.category_id }}" {% if worklog.subcategory and worklog.subcategory.id == subcategory.id %}selected{% endif %}>{{ subcategory.name }}</option>
                     {% endfor %}
                 </select>
-                <a href="{% url 'project_list' %}" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.75rem 1rem;">管理</a>
+                <a href="{% url 'subcategory_list' %}" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.75rem 1rem;">管理</a>
             </div>
         </div>
     </div>
     
-    <div class="form-group">
-        <label for="content">作業内容 <span style="color: red;">*</span></label>
-        <textarea id="content" name="content" required>{% if worklog %}{{ worklog.content }}{% endif %}</textarea>
+    <div class="form-row">
+        <div class="form-group">
+            <label for="content">作業内容 <span style="color: red;">*</span></label>
+            <textarea id="content" name="content" required>{% if worklog %}{{ worklog.content }}{% endif %}</textarea>
+        </div>
     </div>
     
     <div class="form-row">
@@ -81,4 +97,35 @@
         <a href="{% url 'worklog_list' %}" class="btn btn-secondary">キャンセル</a>
     </div>
 </form>
+
+<script>
+document.getElementById('category').addEventListener('change', function() {
+    const categoryId = this.value;
+    const subcategorySelect = document.getElementById('subcategory');
+    const options = subcategorySelect.querySelectorAll('option');
+
+    // 現在の選択をクリア
+    subcategorySelect.value = '';
+
+    options.forEach(option => {
+        if (option.value === '') {
+            // "-- 選択してください --" は常に表示
+            option.style.display = '';
+        } else {
+            // data-category属性でフィルタリング
+            const optionCategoryId = option.getAttribute('data-category');
+            if (categoryId === '' || optionCategoryId === categoryId) {
+                option.style.display = '';
+            } else {
+                option.style.display = 'none';
+            }
+        }
+    });
+});
+
+// ページ読み込み時に初期フィルタリングを実行
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('category').dispatchEvent(new Event('change'));
+});
+</script>
 {% endblock %}

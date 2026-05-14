@@ -13,6 +13,12 @@ urlpatterns = [
     path('categories/<int:pk>/edit/', views.CategoryUpdateView.as_view(), name='category_update'),
     path('categories/<int:pk>/delete/', views.CategoryDeleteView.as_view(), name='category_delete'),
     
+    # サブカテゴリ管理
+    path('subcategories/', views.SubCategoryListView.as_view(), name='subcategory_list'),
+    path('subcategories/create/', views.SubCategoryCreateView.as_view(), name='subcategory_create'),
+    path('subcategories/<int:pk>/edit/', views.SubCategoryUpdateView.as_view(), name='subcategory_update'),
+    path('subcategories/<int:pk>/delete/', views.SubCategoryDeleteView.as_view(), name='subcategory_delete'),
+    
     # 案件管理
     path('projects/', views.ProjectListView.as_view(), name='project_list'),
     path('projects/create/', views.ProjectCreateView.as_view(), name='project_create'),

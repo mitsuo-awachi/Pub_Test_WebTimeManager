@@ -9,6 +9,11 @@ class Category(models.Model):
     name = models.CharField('カテゴリ名', max_length=100)
     def __str__(self): return self.name
 
+class SubCategory(models.Model):
+    name = models.CharField('サブカテゴリ名', max_length=100)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name='カテゴリ')
+    def __str__(self): return self.name
+
 class Project(models.Model):
     name = models.CharField('案件名', max_length=200)
     def __str__(self): return self.name
@@ -18,6 +23,7 @@ class WorkLog(models.Model):
     start_time = models.TimeField('開始時刻')
     end_time = models.TimeField('終了時刻')
     category = models.ForeignKey(Category, on_delete=models.PROTECT, verbose_name='カテゴリ')
+    subcategory = models.ForeignKey(SubCategory, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='サブカテゴリ')
     project = models.ForeignKey(Project, on_delete=models.PROTECT, verbose_name='案件名')
     content = models.TextField('作業内容')
     redmine_no = models.IntegerField('Redmine番号', blank=True, null=True)

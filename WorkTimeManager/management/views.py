@@ -6,11 +6,11 @@ import json
 import os
 import csv
 import io
-from .models import WorkLog, Category, Project
+from .models import WorkLog, Category, Project, SubCategory
 
 
 def sync_data_to_db(data):
-    from .models import Category, Project
+    from .models import Category, Project, SubCategory
 
     # JSON のカテゴリ／案件を DB に登録または更新する
     for category in data.get('categories', []):
@@ -25,16 +25,26 @@ def sync_data_to_db(data):
             defaults={'name': project['name']},
         )
 
+    # サブカテゴリを同期
+    for subcategory in data.get('subcategories', []):
+        category_id = subcategory['category_id']
+        SubCategory.objects.update_or_create(
+            id=subcategory['id'],
+            defaults={'name': subcategory['name'], 'category_id': category_id},
+        )
+
 def save_data_to_json():
     """DBのデータをJSONファイルに保存する"""
     data_file = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', 'config', 'data.json'))
     
     categories = list(Category.objects.values('id', 'name').order_by('id'))
     projects = list(Project.objects.values('id', 'name').order_by('id'))
+    subcategories = list(SubCategory.objects.values('id', 'name', 'category_id').order_by('id'))
     
     data = {
         'categories': categories,
-        'projects': projects
+        'projects': projects,
+        'subcategories': subcategories,
     }
     
     with open(data_file, 'w', encoding='utf-8') as f:
@@ -54,6 +64,7 @@ class JsonDataRefreshMixin:
         data = load_data()
         context['categories'] = data['categories']
         context['projects'] = data['projects']
+        context['subcategories'] = data['subcategories']
         return context
 
 # リスト表示ビュー
@@ -79,14 +90,20 @@ def worklog_list(request):
     data = load_data()
     category_map = {str(c['id']): c['name'] for c in data['categories']}
     project_map = {str(p['id']): p['name'] for p in data['projects']}
+    subcategory_map = {str(s['id']): s['name'] for s in data['subcategories']}
     for worklog in worklogs:
         worklog.display_category_name = category_map.get(str(worklog.category_id), getattr(worklog.category, 'name', ''))
         worklog.display_project_name = project_map.get(str(worklog.project_id), getattr(worklog.project, 'name', ''))
+        worklog.display_subcategory_name = subcategory_map.get(str(worklog.subcategory_id), getattr(worklog.subcategory, 'name', '')) if worklog.subcategory_id else ''
+
+    total_seconds = sum(w.working_seconds for w in worklogs)
 
     context = {
         'worklogs': worklogs,
         'categories': data['categories'],
         'projects': data['projects'],
+        'subcategories': data['subcategories'],
+        'total_work_time': format_seconds_to_hours_minutes(total_seconds),
     }
     return render(request, 'management/worklog_list.html', context)
 
@@ -222,8 +239,14 @@ def worklog_create(request):
             worklog = WorkLog()
             worklog.date = datetime.strptime(request.POST['date'], '%Y-%m-%d').date()
             worklog.start_time = request.POST['start_time']
-            worklog.end_time = request.POST['end_time']
+            end_time_str = request.POST.get('end_time')
+            if end_time_str:
+                worklog.end_time = end_time_str
+            else:
+                worklog.end_time = request.POST['start_time']
             worklog.category_id = request.POST['category']
+            subcategory_id = request.POST.get('subcategory')
+            worklog.subcategory_id = subcategory_id if subcategory_id else None
             worklog.project_id = request.POST['project']
             worklog.content = request.POST['content']
             worklog.redmine_no = request.POST.get('redmine_no') or None
@@ -236,6 +259,7 @@ def worklog_create(request):
                 'error': str(e),
                 'categories': data['categories'],
                 'projects': data['projects'],
+                'subcategories': data['subcategories'],
             }
             return render(request, 'management/worklog_form.html', context)
     
@@ -243,6 +267,7 @@ def worklog_create(request):
     context = {
         'categories': data['categories'],
         'projects': data['projects'],
+        'subcategories': data['subcategories'],
         'today': datetime.now().date(),
     }
     return render(request, 'management/worklog_form.html', context)
@@ -255,8 +280,14 @@ def worklog_update(request, pk):
         try:
             worklog.date = datetime.strptime(request.POST['date'], '%Y-%m-%d').date()
             worklog.start_time = request.POST['start_time']
-            worklog.end_time = request.POST['end_time']
+            end_time_str = request.POST.get('end_time')
+            if end_time_str:
+                worklog.end_time = end_time_str
+            else:
+                worklog.end_time = request.POST['start_time']
             worklog.category_id = request.POST['category']
+            subcategory_id = request.POST.get('subcategory')
+            worklog.subcategory_id = subcategory_id if subcategory_id else None
             worklog.project_id = request.POST['project']
             worklog.content = request.POST['content']
             worklog.redmine_no = request.POST.get('redmine_no') or None
@@ -269,6 +300,7 @@ def worklog_update(request, pk):
                 'worklog': worklog,
                 'categories': data['categories'],
                 'projects': data['projects'],
+                'subcategories': data['subcategories'],
                 'error': str(e),
             }
             return render(request, 'management/worklog_form.html', context)
@@ -278,6 +310,7 @@ def worklog_update(request, pk):
         'worklog': worklog,
         'categories': data['categories'],
         'projects': data['projects'],
+        'subcategories': data['subcategories'],
     }
     return render(request, 'management/worklog_form.html', context)
 
@@ -332,6 +365,55 @@ class CategoryDeleteView(DeleteView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['cancel_url'] = reverse_lazy('category_list')
+        context['object_verbose_name'] = self.model._meta.verbose_name
+        return context
+    
+    def delete(self, request, *args, **kwargs):
+        response = super().delete(request, *args, **kwargs)
+        save_data_to_json()  # JSONファイルを更新
+        return response
+
+# サブカテゴリ一覧ビュー
+class SubCategoryListView(ListView):
+    model = SubCategory
+    template_name = 'management/subcategory_list.html'
+    context_object_name = 'subcategories'
+    ordering = ['category__name', 'name']
+
+# サブカテゴリ作成ビュー
+class SubCategoryCreateView(JsonDataRefreshMixin, CreateView):
+    model = SubCategory
+    template_name = 'management/subcategory_form.html'
+    fields = ['name', 'category']
+    success_url = reverse_lazy('subcategory_list')
+    
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        save_data_to_json()  # JSONファイルを更新
+        return response
+
+# サブカテゴリ編集ビュー
+class SubCategoryUpdateView(JsonDataRefreshMixin, UpdateView):
+    model = SubCategory
+    template_name = 'management/subcategory_form.html'
+    fields = ['name', 'category']
+    success_url = reverse_lazy('subcategory_list')
+    
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        save_data_to_json()  # JSONファイルを更新
+        return response
+
+# サブカテゴリ削除ビュー
+class SubCategoryDeleteView(DeleteView):
+    model = SubCategory
+    template_name = 'management/confirm_delete.html'
+    success_url = reverse_lazy('subcategory_list')
+    context_object_name = 'object'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cancel_url'] = reverse_lazy('subcategory_list')
         context['object_verbose_name'] = self.model._meta.verbose_name
         return context
     

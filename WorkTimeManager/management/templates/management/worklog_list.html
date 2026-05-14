@@ -47,6 +47,7 @@
             <th>終了時刻</th>
             <th>作業時間</th>
             <th>カテゴリ</th>
+            <th>サブカテゴリ</th>
             <th>案件名</th>
             <th>作業内容</th>
             <th>Redmine番号</th>
@@ -62,6 +63,7 @@
             <td>{{ worklog.end_time|time:"H:i" }}</td>
             <td>{{ worklog.working_hours }}</td>
             <td>{{ worklog.display_category_name }}</td>
+            <td>{{ worklog.display_subcategory_name|default:"-" }}</td>
             <td>{{ worklog.display_project_name }}</td>
             <td>{{ worklog.content|truncatewords:15 }}</td>
             <td>{{ worklog.redmine_no|default:"-" }}</td>
@@ -78,7 +80,7 @@
 </table>
 
 <div style="margin-top: 1.5rem; padding: 1rem; background-color: #f0f9ff; border-radius: 4px; border-left: 4px solid #0284c7;">
-    <strong>合計作業ログ：</strong> {{ worklogs.count }}件
+    <strong>合計作業ログ：</strong> {{ worklogs.count }}件　／　<strong>合計作業時間：</strong> {{ total_work_time }}
 </div>
 
 {% else %}
