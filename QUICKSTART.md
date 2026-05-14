@@ -52,6 +52,11 @@ Starting development server at http://127.0.0.1:8000/
 Quit the server with CONTROL-C.
 ```
 
+waitressを起動する場合：
+```
+waitress-serve --host=0.0.0.0 --port=8000 WorkTimeManager.wsgi:application
+```
+
 ## ステップ4: ブラウザでアクセス
 
 ### メインアプリケーション
