@@ -3,6 +3,9 @@
 {% block title %}カテゴリ一覧 - 作業時間管理{% endblock %}
 
 {% block content %}
+<div style="margin-bottom: 1rem;">
+    <button onclick="history.back()" class="btn btn-secondary">&larr; 戻る</button>
+</div>
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
     <h2>カテゴリ一覧</h2>
     <a href="{% url 'category_create' %}" class="btn btn-primary">新規作成</a>

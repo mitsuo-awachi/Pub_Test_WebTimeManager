@@ -69,7 +69,7 @@ class JsonDataRefreshMixin:
 
 # リスト表示ビュー
 def worklog_list(request):
-    worklogs = WorkLog.objects.select_related('category', 'project').all().order_by('-date')
+    worklogs = WorkLog.objects.select_related('category', 'project').all().order_by('-date', '-start_time')
     date_str = request.GET.get('date')
     category_id = request.GET.get('category')
     project_id = request.GET.get('project')

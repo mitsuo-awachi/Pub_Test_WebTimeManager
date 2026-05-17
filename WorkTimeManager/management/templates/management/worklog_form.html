@@ -59,6 +59,7 @@
                 </select>
                 <a href="{% url 'category_list' %}" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.75rem 1rem;">管理</a>
             </div>
+        </div>
         <div class="form-group">
             <label for="subcategory">サブカテゴリ</label>
             <div style="display: flex; gap: 0.5rem; align-items: flex-end;">
@@ -72,27 +73,24 @@
             </div>
         </div>
     </div>
-    
+
     <div class="form-row">
         <div class="form-group">
             <label for="content">作業内容 <span style="color: red;">*</span></label>
-            <textarea id="content" name="content" required>{% if worklog %}{{ worklog.content }}{% endif %}</textarea>
+            <textarea id="content" name="content" required rows="1" style="min-height: unset;">{% if worklog %}{{ worklog.content }}{% endif %}</textarea>
         </div>
-    </div>
-    
-    <div class="form-row">
         <div class="form-group">
             <label for="redmine_no">Redmine番号</label>
             <input type="number" id="redmine_no" name="redmine_no" value="{% if worklog %}{{ worklog.redmine_no }}{% endif %}">
         </div>
     </div>
-    
+
     <div class="form-group">
         <label for="remarks">備考</label>
-        <textarea id="remarks" name="remarks">{% if worklog %}{{ worklog.remarks }}{% endif %}</textarea>
+        <textarea id="remarks" name="remarks" rows="3">{% if worklog %}{{ worklog.remarks }}{% endif %}</textarea>
     </div>
     
-    <div class="form-actions">
+    <div class="form-actions" style="justify-content: flex-end;">
         <button type="submit" class="btn btn-primary">保存</button>
         <a href="{% url 'worklog_list' %}" class="btn btn-secondary">キャンセル</a>
     </div>
